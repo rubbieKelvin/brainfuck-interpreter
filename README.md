@@ -52,7 +52,25 @@ To see the raw output as a vector of bytes, use the --debug flag:
 Given a file hello.bf containing:
 
 ```brainfuck
-+[>[<+>-]++++++++[<++++++>-]<.]
+print 0 to 99
+
+++++++++++
+>++++++++++++++++++++++++++++++++++++++++++++++++
+>++++++++++
+[
+
+  >++++++++++++++++++++++++++++++++++++++++++++++++
+  >++++++++++
+  [
+    <<<. >>.+ <<<.
+    >>>>-
+  ]
+  <----------------------------------------------------------
+
+  <<+
+  >
+  -
+]
 ```
 
 Run the program:
@@ -60,7 +78,10 @@ Run the program:
 ```bash
 ./brainfuck-interpreter hello.bf
 # Expected output:
-# H
+# 00
+# 01
+# ..
+# 99
 ```
 
 ### Error Handling
