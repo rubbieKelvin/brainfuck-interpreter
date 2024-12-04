@@ -10,7 +10,7 @@ use core::str;
 use std::{
     env,
     fs::File,
-    io::{self, stdin, stdout, Error, Read, Write},
+    io::{self, stdout, Error, Read, Write},
 };
 
 use getch::Getch;
