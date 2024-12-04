@@ -19,6 +19,7 @@ use getch::Getch;
 const COMMANDS: [char; 8] = ['>', '<', '+', '-', '.', ',', '[', ']'];
 
 struct Interpreter {
+    max_pointer: usize,
     pointer: usize,
     cells: [u8; 30000],
     program_counter: usize,
@@ -28,6 +29,7 @@ struct Interpreter {
 impl Interpreter {
     fn new() -> Self {
         return Interpreter {
+            max_pointer: 0, // maximum accessed pointer throughout the program
             pointer: 0,
             program_counter: 0,
             cells: [0; 30000],
@@ -38,7 +40,7 @@ impl Interpreter {
     fn excecute_str(&mut self, code: &str) -> io::Result<Vec<u8>> {
         // remove lines beginning with ; for line comment
         let line_comment_striped: Vec<&str> =
-            code.split('\n').filter(|x| !x.starts_with(';')).collect();
+            code.split('\n').filter(|x| !x.starts_with('#')).collect();
         let line_comment_striped: String = line_comment_striped.concat();
 
         let program = Vec::from_iter(
@@ -54,6 +56,11 @@ impl Interpreter {
                 match command {
                     '>' => {
                         self.pointer += 1;
+                        self.max_pointer = if self.pointer > self.max_pointer {
+                            self.pointer
+                        } else {
+                            self.max_pointer
+                        };
                     }
                     '<' => {
                         self.pointer -= 1;
@@ -129,7 +136,13 @@ fn main() -> io::Result<()> {
                 if let Some(val) = args.get(2) {
                     match val.as_str() {
                         "--debug" => {
-                            println!("\n\noutput: {:?}", out);
+                            println!(
+                                "\n+------------\noutput: {:?}\ncells: {:?}\ncurrent pointer location: {:?}\nlast pointer location: {:?}",
+                                out,
+                                &interpreter.cells[1..interpreter.max_pointer],
+                                interpreter.pointer,
+                                interpreter.max_pointer
+                            );
                         }
                         n => {
                             println!("Invalid argument {n}");
