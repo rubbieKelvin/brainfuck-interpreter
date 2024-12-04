@@ -13,7 +13,9 @@ use std::{
     io::{self, stdin, stdout, Error, Read, Write},
 };
 
-// +[>[]]
+use getch::Getch;
+
+// brainfuck operators
 const COMMANDS: [char; 8] = ['>', '<', '+', '-', '.', ',', '[', ']'];
 
 struct Interpreter {
@@ -34,7 +36,17 @@ impl Interpreter {
     }
 
     fn excecute_str(&mut self, code: &str) -> io::Result<Vec<u8>> {
-        let program = Vec::from_iter(code.chars().into_iter().filter(|x| COMMANDS.contains(x)));
+        // remove lines beginning with ; for line comment
+        let line_comment_striped: Vec<&str> =
+            code.split('\n').filter(|x| !x.starts_with(';')).collect();
+        let line_comment_striped: String = line_comment_striped.concat();
+
+        let program = Vec::from_iter(
+            line_comment_striped
+                .chars()
+                .into_iter()
+                .filter(|x| COMMANDS.contains(x)),
+        );
         let mut output: Vec<u8> = vec![];
 
         return loop {
@@ -61,11 +73,17 @@ impl Interpreter {
                         output.push(out);
                     }
                     ',' => {
-                        let mut buffer = [0_u8; 1];
-                        let mut handler = stdin().lock();
-                        handler.read_exact(&mut buffer)?;
+                        let g = Getch::new();
 
-                        self.cells[self.pointer] = buffer[0];
+                        match g.getch() {
+                            Ok(input) => {
+                                self.cells[self.pointer] = input;
+                            }
+                            Err(_e) => {
+                                println!("Error getting character from standard input");
+                                panic!();
+                            }
+                        }
                     }
                     '[' => {
                         self.loop_program_pointer.push(self.program_counter);
@@ -117,7 +135,7 @@ fn main() -> io::Result<()> {
                             println!("Invalid argument {n}");
                         }
                     }
-                }else{
+                } else {
                     println!();
                 }
             }
